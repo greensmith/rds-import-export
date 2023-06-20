@@ -1,3 +1,5 @@
+[![docker build and publish](https://github.com/greensmith/rds-import-export/actions/workflows/docker.yaml/badge.svg)](https://github.com/greensmith/rds-import-export/actions/workflows/docker.yaml)
+
 # rds-import-export
 
 container to import / export RDS databases on AWS.
