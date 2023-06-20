@@ -21,7 +21,7 @@ jobs:
         with:
           images: greensmith/rds-import-export
       - name: Build and push Docker image
-        uses: docker/build-push-action@2
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
