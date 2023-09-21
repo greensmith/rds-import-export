@@ -244,11 +244,12 @@ drop_db_tables() {
     # optional, empty tables in target db before import (otherwise can cause errors)
     echo "emptying tables in $TARGET_DB_NAME"
     # run mysql queries to get all the table names in the database
-    tables=$(mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "show tables")
+    tables=$(mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -Nse "show tables")
     # disable foreign key checks
     mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "SET FOREIGN_KEY_CHECKS = 0;"
     # loop through table names and truncate each table
     for table in $tables; do
+        echo droping table $table
         mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "drop table $table"
     done
     # enable foreign key checks
