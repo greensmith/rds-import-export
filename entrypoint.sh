@@ -250,7 +250,7 @@ drop_db_tables() {
     # loop through table names and truncate each table
     for table in $tables; do
         echo droping table $table
-        mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "drop table $table"
+        mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "SET FOREIGN_KEY_CHECKS = 0; DROP TABLE $table"
     done
     # enable foreign key checks
     mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "SET FOREIGN_KEY_CHECKS = 1;"
