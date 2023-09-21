@@ -1,3 +1,5 @@
+[![docker build and publish](https://github.com/greensmith/rds-import-export/actions/workflows/docker.yaml/badge.svg)](https://github.com/greensmith/rds-import-export/actions/workflows/docker.yaml)
+
 # rds-import-export
 
 container to import / export RDS databases on AWS.
@@ -7,6 +9,10 @@ container to import / export RDS databases on AWS.
 - todo: other container types
 - todo: other db types.
 - todo: export and import between two dbs
+
+## docker hub
+
+find built containers here - https://hub.docker.com/r/greensmith/rds-import-export
 
 ## environment variables used
 
