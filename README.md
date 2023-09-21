@@ -10,6 +10,10 @@ container to import / export RDS databases on AWS.
 - todo: other db types.
 - todo: export and import between two dbs
 
+## docker hub
+
+find built containers here - https://hub.docker.com/r/greensmith/rds-import-export
+
 ## environment variables used
 
 - AWS_REGION: the aws region used (required for S3 bucket to work)

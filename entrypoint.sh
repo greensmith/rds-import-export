@@ -125,6 +125,14 @@ _params() {
         fi
         shift
         ;;
+    -drop | --drop-tables) # drop tables
+        if [[ -v DROP_TABLES ]]; then
+            echo "DROP_TABLES set as environment variable, using : $DROP_TABLES"
+        else
+            $DROP_TABLES="${2-}"
+        fi
+        shift
+        ;;
     -s3 | --s3-bucket) # s3 bucket
         if [[ -v S3_BUCKET ]]; then
             echo "S3_BUCKET set as environment variable, using : $S3_BUCKET"
@@ -232,9 +240,24 @@ verify_exportimport_params() {
 #     fi
 # }
 
+drop_db_tables() {
+    # optional, empty tables in target db before import (otherwise can cause errors)
+    echo "emptying tables in $TARGET_DB_NAME"
+    # run mysql queries to get all the table names in the database
+    tables=$(mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "show tables")
+    # disable foreign key checks
+    mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "SET FOREIGN_KEY_CHECKS = 0;"
+    # loop through table names and truncate each table
+    for table in $tables; do
+        mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "drop table $table"
+    done
+    # enable foreign key checks
+    mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "SET FOREIGN_KEY_CHECKS = 1;"
+}
+
 # export from source db
 run_export() {
-    echo "exporting $DB_TYPE database to $FILE_NAME"
+    echo "exporting $SOURCE_DB_NAME database to $FILE_NAME"
     mysqldump -h $SOURCE_DB_HOST -u $SOURCE_DB_USER -p$SOURCE_DB_PASSWORD $SOURCE_DB_NAME > $FILE_NAME
     # TODO: support other DB TYPES
     # if [[ $DB_TYPE == "mysql" ]]; then
@@ -245,8 +268,16 @@ run_export() {
 }
 
 run_import() {
-    echo "importing $FILE_NAME to $DB_TYPE"
-    mysql -h $SOURCE_DB_HOST -u $SOURCE_DB_USER -p$SOURCE_DB_PASSWORD $SOURCE_DB_NAME < $FILE_NAME
+    echo "importing $FILE_NAME to $TARGET_DB_NAME"
+    if [[ $DROP_TABLES == "true" ]]; then
+        drop_db_tables
+    fi
+    # disable foreign key checks
+    mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "SET FOREIGN_KEY_CHECKS = 0;"
+    # import
+    mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME < $FILE_NAME
+    # enable foreign key checks
+    mysql -h $TARGET_DB_HOST -u $TARGET_DB_USER -p$TARGET_DB_PASSWORD $TARGET_DB_NAME -e "SET FOREIGN_KEY_CHECKS = 1;"
     # # TODO: support other DB TYPES
     # if [[ $DB_TYPE == "mysql" ]]; then
     #     mysql -h $SOURCE_DB_HOST -u $SOURCE_DB_USER -p$SOURCE_DB_PASSWORD $SOURCE_DB_NAME < $FILE_NAME
